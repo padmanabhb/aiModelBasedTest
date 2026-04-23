@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model-Based Test Flow Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.20.0/dist/cytoscape.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🚀 AI Model-Based Test Flow Generator</h1>
+            <p class="subtitle">Automated Requirement Analysis & Optimized Test Flow Creation</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+
+            <!-- SECTION 1: INPUT SECTION -->
+            <section class="section section-1" id="section-input">
+                <h2 class="section-title">📝 Section 1: Input & Configuration</h2>
+
+                <div class="input-container">
+                    <div class="form-group">
+                        <label for="inputType">Select Input Type:</label>
+                        <select id="inputType" onchange="handleTypeChange()">
+                            <option value="requirement">Requirement</option>
+                            <option value="test_case">Test Cases</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-secondary" onclick="loadTemplate()">📋 Load Template</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contentInput">Enter Requirement or Test Cases:</label>
+                        <textarea id="contentInput"
+                            placeholder="Enter your content here... Click 'Load Template' to see the format"
+                            rows="8"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="analyzeInput()">🔍 Analyze & Generate Flow</button>
+                        <button class="btn btn-secondary" onclick="clearInput()">🗑️ Clear</button>
+                    </div>
+
+                    <div id="loadingIndicator" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Analyzing content and generating flows...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: FLOW ANALYSIS -->
+            <section class="section section-2" id="section-flows">
+                <h2 class="section-title">🔄 Section 2: Test Flows & Analysis</h2>
+
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="switchTab('flows')">Test Flows</button>
+                    <button class="tab-btn" onclick="switchTab('analysis')">Analysis Summary</button>
+                </div>
+
+                <div id="flowsTab" class="tab-content active">
+                    <div id="flowsList" class="flows-container">
+                        <p class="placeholder">No flows generated yet. Run analysis to see results.</p>
+                    </div>
+                </div>
+
+                <div id="analysisTab" class="tab-content">
+                    <div id="analysisSummary" class="analysis-container">
+                        <p class="placeholder">No analysis available yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: FLOW DIAGRAM -->
+            <section class="section section-3" id="section-diagram">
+                <h2 class="section-title">📊 Section 3: Modifiable Flow Diagram</h2>
+
+                <div class="diagram-toolbar">
+                    <button class="btn btn-small" onclick="exportDiagram('mxgraph')">📥 Export to Draw.io</button>
+                    <button class="btn btn-small" onclick="exportDiagram('json')">📄 Export as JSON</button>
+                    <button class="btn btn-small" onclick="exportDiagram('pptx')">🎯 Export to PowerPoint</button>
+                    <button class="btn btn-small" onclick="zoomDiagram('in')">🔍+ Zoom In</button>
+                    <button class="btn btn-small" onclick="zoomDiagram('out')">🔍- Zoom Out</button>
+                    <button class="btn btn-small" onclick="fitDiagram()">⬜ Fit View</button>
+                </div>
+
+                <div id="diagramContainer" class="diagram-area">
+                    <p class="placeholder">Diagram will appear here after analysis</p>
+                </div>
+            </section>
+
+            <!-- SECTION 4: PATH ANALYSIS -->
+            <section class="section section-4" id="section-paths">
+                <h2 class="section-title">🛣️ Section 4: Path Analysis & Statistics</h2>
+
+                <div class="path-tabs">
+                    <button class="path-tab-btn active" onclick="switchPathTab('navigation')">🗺️ User
+                        Navigation</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('nodes')">📍 All Nodes</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('edges')">🔗 All Edges</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('inout')">↕️ In-Out Edges</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('pairs')">🔀 All Pairs</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('critical')">⚡ Critical Paths</button>
+                    <button class="path-tab-btn" onclick="switchPathTab('stats')">📈 Statistics</button>
+                </div>
+
+                <div id="pathContent" class="path-content">
+                    <div id="navigationTab" class="path-panel active">
+                        <div id="navigationContainer" class="navigation-table"></div>
+                    </div>
+
+                    <div id="nodesTab" class="path-panel">
+                        <div id="nodesList" class="node-table"></div>
+                        <div style="margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px;">
+                            <h4>4.1 Test Cases - Node Coverage</h4>
+                            <div style="margin-bottom: 10px;">
+                                <button class="btn btn-small" onclick="generateTestCases('nodes')">🧪 Generate Test
+                                    Cases</button>
+                                <button class="btn btn-small" onclick="exportTestCases('csv')">📥 Export CSV</button>
+                                <button class="btn btn-small" onclick="exportTestCases('excel')">📊 Export
+                                    Excel</button>
+                            </div>
+                            <div id="nodesCoverageTestCases" class="test-cases-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="edgesTab" class="path-panel">
+                        <div id="edgesList" class="edge-table"></div>
+                        <div style="margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px;">
+                            <h4>4.1 Test Cases - Edge Coverage</h4>
+                            <div style="margin-bottom: 10px;">
+                                <button class="btn btn-small" onclick="generateTestCases('edges')">🧪 Generate Test
+                                    Cases</button>
+                                <button class="btn btn-small" onclick="exportTestCases('csv')">📥 Export CSV</button>
+                                <button class="btn btn-small" onclick="exportTestCases('excel')">📊 Export
+                                    Excel</button>
+                            </div>
+                            <div id="edgesCoverageTestCases" class="test-cases-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="inoutTab" class="path-panel">
+                        <div id="inoutList" class="inout-table"></div>
+                        <div style="margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px;">
+                            <h4>4.1 Test Cases - In/Out Edge Coverage</h4>
+                            <div style="margin-bottom: 10px;">
+                                <button class="btn btn-small" onclick="generateTestCases('in-out')">🧪 Generate Test
+                                    Cases</button>
+                                <button class="btn btn-small" onclick="exportTestCases('csv')">📥 Export CSV</button>
+                                <button class="btn btn-small" onclick="exportTestCases('excel')">📊 Export
+                                    Excel</button>
+                            </div>
+                            <div id="inoutCoverageTestCases" class="test-cases-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="pairsTab" class="path-panel">
+                        <div id="pairsList" class="pair-table"></div>
+                        <div style="margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px;">
+                            <h4>4.1 Test Cases - Pair Coverage</h4>
+                            <div style="margin-bottom: 10px;">
+                                <button class="btn btn-small" onclick="generateTestCases('pairs')">🧪 Generate Test
+                                    Cases</button>
+                                <button class="btn btn-small" onclick="exportTestCases('csv')">📥 Export CSV</button>
+                                <button class="btn btn-small" onclick="exportTestCases('excel')">📊 Export
+                                    Excel</button>
+                            </div>
+                            <div id="pairsCoverageTestCases" class="test-cases-table"></div>
+                        </div>
+                    </div>
+
+                    <div id="criticalTab" class="path-panel">
+                        <div id="criticalList" class="critical-table"></div>
+                    </div>
+
+                    <div id="statsTab" class="path-panel">
+                        <div id="statsDisplay" class="stats-grid"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
